@@ -22,6 +22,8 @@ const normalize = (name: string) => {
 
 const MarkerCard: React.FC<{ marker: LabMarker, history: HealthAnalysis[], currentId: string }> = ({ marker, history, currentId }) => {
   const status = marker.status.toLowerCase();
+  const isCritical = status === 'critical';
+
   const icon = (name: string) => {
     const n = name.toLowerCase();
     if (n.includes('glucose') || n.includes('hba1c')) return 'fa-droplet';
@@ -35,11 +37,10 @@ const MarkerCard: React.FC<{ marker: LabMarker, history: HealthAnalysis[], curre
     normal: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100', bar: 'bg-emerald-500', color: '#10b981' },
     low: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100', bar: 'bg-blue-500', color: '#3b82f6' },
     high: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-100', bar: 'bg-red-500', color: '#ef4444' },
-    critical: { bg: 'bg-red-600', text: 'text-white', border: 'border-red-700', bar: 'bg-red-600', color: '#dc2626', alarming: true },
+    critical: { bg: 'bg-red-600', text: 'text-white', border: 'border-red-600', bar: 'bg-red-600', color: '#dc2626' },
   };
 
   const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.normal;
-  const isCritical = status === 'critical';
 
   const currentMarkerNorm = normalize(marker.name);
   const currentAnalysis = history.find(h => h.id === currentId);
@@ -87,19 +88,30 @@ const MarkerCard: React.FC<{ marker: LabMarker, history: HealthAnalysis[], curre
   }));
 
   return (
-    <div className={`p-5 rounded-[2.5rem] border bg-white border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-2xl hover:shadow-indigo-500/10 hover:border-indigo-400 hover:-translate-y-2 group relative flex flex-col h-full cursor-default ${isCritical ? 'animate-alarm border-red-500' : ''}`}>
+    <div className={`p-5 rounded-[2.5rem] border transition-all duration-500 ease-out group relative flex flex-col h-full cursor-default 
+      ${isCritical 
+        ? 'animate-alarm bg-red-50/50 border-red-600 shadow-xl shadow-red-200 z-10' 
+        : 'bg-white border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 hover:border-indigo-400 hover:-translate-y-2'
+      }`}>
+      
+      {isCritical && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg animate-badge-pulse z-20">
+          Emergency Threshold
+        </div>
+      )}
+
       <div className="flex justify-between items-start mb-4">
-        <div className={`w-10 h-10 ${isCritical ? 'bg-red-500 text-white' : config.bg + ' ' + config.text} rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 shadow-sm`}>
+        <div className={`w-10 h-10 ${isCritical ? 'bg-red-600 text-white' : config.bg + ' ' + config.text} rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 shadow-sm`}>
           <i className={`fa-solid ${icon(marker.name)}`}></i>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter border ${config.bg} ${config.text} ${isCritical ? 'bg-red-600 text-white border-red-700' : 'border-' + config.border}`}>
+          <div className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter border ${isCritical ? 'bg-red-700 text-white border-red-800' : config.bg + ' ' + config.text + ' ' + config.border}`}>
             {marker.status}
           </div>
           {clinicalShift && (
             <div className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
               clinicalShift === 'improvement' ? 'bg-emerald-50 text-emerald-700' : 
-              clinicalShift === 'deterioration' ? 'bg-red-50 text-red-700' : 'bg-slate-50 text-slate-500'
+              clinicalShift === 'deterioration' ? 'bg-red-100 text-red-800' : 'bg-slate-50 text-slate-500'
             }`}>
               {clinicalShift === 'stable' ? <i className="fa-solid fa-minus"></i> : clinicalShift === 'improvement' ? <i className="fa-solid fa-caret-up"></i> : <i className="fa-solid fa-caret-down"></i>}
               {clinicalShift}
@@ -109,38 +121,38 @@ const MarkerCard: React.FC<{ marker: LabMarker, history: HealthAnalysis[], curre
       </div>
       
       <div className="mb-2">
-        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5 truncate group-hover:text-indigo-500">{marker.name}</h4>
+        <h4 className={`text-[10px] font-black uppercase tracking-widest mb-0.5 truncate ${isCritical ? 'text-red-900' : 'text-slate-400 group-hover:text-indigo-500'}`}>{marker.name}</h4>
         <div className="flex items-center gap-3">
           <div className="flex items-baseline gap-1">
-            <span className={`text-xl font-black tracking-tight ${isCritical ? 'text-red-600' : 'text-slate-900'} group-hover:text-indigo-900`}>{marker.value}</span>
-            <span className="text-[10px] font-bold text-slate-400">{marker.unit}</span>
+            <span className={`text-xl font-black tracking-tight ${isCritical ? 'text-red-700' : 'text-slate-900'} group-hover:text-indigo-900`}>{marker.value}</span>
+            <span className={`text-[10px] font-bold ${isCritical ? 'text-red-400' : 'text-slate-400'}`}>{marker.unit}</span>
           </div>
           {directionArrow}
         </div>
       </div>
 
       {sparklineData.length > 1 && (
-        <div className="h-10 w-full mt-1 mb-2 opacity-40 group-hover:opacity-100 transition-opacity">
+        <div className={`h-10 w-full mt-1 mb-2 transition-opacity ${isCritical ? 'opacity-80' : 'opacity-40 group-hover:opacity-100'}`}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={sparklineData}>
-              <Area type="monotone" dataKey="value" stroke={config.color} strokeWidth={2} fill={config.color} fillOpacity={0.1} isAnimationActive={false} />
+              <Area type="monotone" dataKey="value" stroke={config.color} strokeWidth={2} fill={config.color} fillOpacity={isCritical ? 0.3 : 0.1} isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
 
-      {deltaText && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight mb-3 transition-colors">{deltaText} vs last report</p>}
+      {deltaText && <p className={`text-[9px] font-bold uppercase tracking-tight mb-3 ${isCritical ? 'text-red-600' : 'text-slate-400'}`}>{deltaText} vs last report</p>}
       
       {marker.context && (
-        <div className={`mt-2 mb-3 p-3 rounded-xl border ${isCritical ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
-          <p className={`text-[9px] leading-relaxed font-bold ${isCritical ? 'text-red-700' : 'text-slate-600'}`}>
-            <i className={`fa-solid fa-link ${isCritical ? 'text-red-400' : 'text-indigo-400'} mr-1.5 opacity-60`}></i>
+        <div className={`mt-2 mb-3 p-3 rounded-xl border ${isCritical ? 'bg-red-100/50 border-red-200' : 'bg-slate-50 border-slate-100'}`}>
+          <p className={`text-[9px] leading-relaxed font-bold ${isCritical ? 'text-red-900' : 'text-slate-600'}`}>
+            <i className={`fa-solid fa-link ${isCritical ? 'text-red-600' : 'text-indigo-400'} mr-1.5`}></i>
             {marker.context}
           </p>
         </div>
       )}
       
-      <p className={`text-[10px] leading-relaxed font-semibold ${isCritical ? 'text-red-500' : 'text-slate-500'} line-clamp-2 italic mt-auto`}>{marker.interpretation}</p>
+      <p className={`text-[10px] leading-relaxed font-semibold italic mt-auto ${isCritical ? 'text-red-700' : 'text-slate-500'} line-clamp-2`}>{marker.interpretation}</p>
     </div>
   );
 };

@@ -20,9 +20,9 @@ const App: React.FC = () => {
 
   // Check for active session on load
   useEffect(() => {
-    const activeSession = sessionStorage.getItem('medic_d_session_key');
+    const activeSession = sessionStorage.getItem('medic_aid_session_key');
     if (activeSession) {
-      const savedData = localStorage.getItem(`medic_d_record_${activeSession}`);
+      const savedData = localStorage.getItem(`medic_aid_record_${activeSession}`);
       if (savedData) {
         setPatient(JSON.parse(savedData));
         setIsLoggedIn(true);
@@ -31,10 +31,9 @@ const App: React.FC = () => {
   }, []);
 
   const handleLogin = (auth: AuthData) => {
-    // Generate a key based on either mobile or abhaId
     const identifier = auth.mobile || auth.abhaId || 'unknown';
     const uniqueKey = btoa(`${identifier}_${auth.name.toLowerCase().trim()}`);
-    const savedData = localStorage.getItem(`medic_d_record_${uniqueKey}`);
+    const savedData = localStorage.getItem(`medic_aid_record_${uniqueKey}`);
     
     if (savedData) {
       setPatient(JSON.parse(savedData));
@@ -47,15 +46,15 @@ const App: React.FC = () => {
         history: []
       };
       setPatient(newPatient);
-      localStorage.setItem(`medic_d_record_${uniqueKey}`, JSON.stringify(newPatient));
+      localStorage.setItem(`medic_aid_record_${uniqueKey}`, JSON.stringify(newPatient));
     }
     
-    sessionStorage.setItem('medic_d_session_key', uniqueKey);
+    sessionStorage.setItem('medic_aid_session_key', uniqueKey);
     setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('medic_d_session_key');
+    sessionStorage.removeItem('medic_aid_session_key');
     setIsLoggedIn(false);
     setPatient(null);
     setCurrentAnalysis(null);
@@ -98,7 +97,7 @@ const App: React.FC = () => {
       
       setPatient(updatedPatient);
       setCurrentAnalysis(newReports.sort((a, b) => b.timestamp - a.timestamp)[0]);
-      localStorage.setItem(`medic_d_record_${patient.id}`, JSON.stringify(updatedPatient));
+      localStorage.setItem(`medic_aid_record_${patient.id}`, JSON.stringify(updatedPatient));
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Analysis encountered an issue. Please ensure the documents are clear.");
@@ -161,7 +160,6 @@ const App: React.FC = () => {
         ) : !currentAnalysis && !isAnalyzing ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-              {/* Welcome Note */}
               <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm flex items-center justify-between animate-in fade-in slide-in-from-left-4 duration-700">
                 <div>
                   <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-1">
@@ -201,7 +199,7 @@ const App: React.FC = () => {
                
                <div className="bg-indigo-600 text-white rounded-[2.5rem] p-10 shadow-lg relative group">
                   <h3 className="text-xl font-black mb-2">Trend Tracking</h3>
-                  <p className="text-indigo-100 text-sm leading-relaxed font-medium">Biomarkers are mapped over time. Medic AI d alerts you to subtle deviations before they impact your quality of life.</p>
+                  <p className="text-indigo-100 text-sm leading-relaxed font-medium">Biomarkers are mapped over time. Medic-AI-d alerts you to subtle deviations before they impact your quality of life.</p>
                   <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Longitudinal Coverage</span>
                     <i className="fa-solid fa-arrow-right-long group-hover:translate-x-2 transition-transform"></i>
@@ -253,7 +251,6 @@ const App: React.FC = () => {
                       </ul>
                    </div>
                  </div>
-                 {/* Chatbot appears once analysis is present */}
                  <HealthChatbot analysis={currentAnalysis!} history={patient?.history || []} />
                </div>
              )}
