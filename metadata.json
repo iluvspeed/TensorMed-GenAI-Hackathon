@@ -1,0 +1,7 @@
+{
+  "name": "Medic AI d - Health Intelligence",
+  "description": "Sophisticated medical report analyzer providing proactive health insights, biomarker tracking, and corrective management recommendations.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
